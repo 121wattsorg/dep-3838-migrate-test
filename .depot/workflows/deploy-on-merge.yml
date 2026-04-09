@@ -1,0 +1,30 @@
+name: Deploy on merge
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  deploy-after-merge:
+    runs-on: depot-ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify merge context
+        run: |
+          echo "=== DEP-4009 e2e proof ==="
+          echo "github.ref=${{ github.ref }}"
+          echo "github.sha=${{ github.sha }}"
+          echo "github.event_name=${{ github.event_name }}"
+          echo "github.base_ref=${{ github.base_ref }}"
+          echo "github.head_ref=${{ github.head_ref }}"
+          echo "github.event.pull_request.merged=${{ github.event.pull_request.merged }}"
+          echo "github.event.pull_request.merge_commit_sha=${{ github.event.pull_request.merge_commit_sha }}"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "=== Assertions ==="
+          [ "$GITHUB_REF" = "refs/heads/main" ] || { echo "FAIL: GITHUB_REF should be refs/heads/main, got $GITHUB_REF"; exit 1; }
+          echo "PASS: GITHUB_REF points to base branch"
+          echo "=== Deploy simulation ==="
+          echo "Would deploy commit $GITHUB_SHA to production"
+          echo "=== Done ==="
